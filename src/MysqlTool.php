@@ -1,0 +1,310 @@
+<?php
+
+namespace Yeosz\Dtool;
+
+class MysqlTool
+{
+    /**
+     * @var DB
+     */
+    protected $db;
+
+    /**
+     * 数据库
+     * @var string
+     */
+    protected $database;
+
+    /**
+     * 排除的表
+     * @var array
+     */
+    protected $exceptTable = [];
+
+    /**
+     * 默认注释
+     * @var array
+     */
+    protected $defaultComment = [];
+
+    /**
+     * Tool constructor.
+     *
+     * @param DB $db
+     * @param string $database
+     */
+    public function __construct(DB $db, $database)
+    {
+        $this->database = $database;
+        $this->db = $db;
+        $this->db->query('set sql_mode ="strict_trans_tables,no_zero_in_date,no_zero_date,error_for_division_by_zero,no_auto_create_user,no_engine_substitution";');
+    }
+
+    /**
+     * 获取所有表及表字段
+     *
+     * @return array
+     */
+    public function getTable()
+    {
+        $field = [
+            'table_name',
+            'table_comment',
+            'table_type',
+            'engine',
+        ];
+        $sql = 'select ' . implode($field, ',') . ' from information_schema.tables where table_schema="' . $this->database . '"';
+        $result = $this->db->query($sql);
+
+        $tables = [];
+        foreach ($result as $item) {
+            if (!in_array($item['table_name'], $this->exceptTable)) {
+                $tables[] = [
+                    'table_name' => $item['table_name'],
+                    'table_comment' => $item['table_comment'],
+                    'table_type' => $item['table_type'],
+                    'engine' => $item['engine']];
+            }
+        }
+
+        // 表字段
+        foreach ($tables as $key => $value) {
+            $sql = "select 
+                    table_schema,table_name,column_name,extra,column_comment,data_type,column_type,column_default,is_nullable,column_key
+                    from information_schema.columns
+                    where table_name = '{$value['table_name']}' and table_schema = '{$this->database}'";
+            $result = $this->db->query($sql);
+            $tables[$key]['column'] = $result;
+        }
+        return $tables;
+    }
+
+    /**
+     * 获取所有主键
+     *
+     * @return array
+     */
+    public function getPrimaryKey()
+    {
+        $sql = "select table_name,column_name
+            from information_schema.key_column_usage 
+            where constraint_name='primary' and table_schema='{$this->database}'";
+        $result = $this->db->query($sql);
+        $primary = [];
+        foreach ($result as $item) {
+            $primary[] = $item['table_name'] . '.' . $item['column_name'];
+        }
+        return $primary;
+    }
+
+    /**
+     * 获取所有外键
+     *
+     * @return array
+     */
+    public function getForeignKey()
+    {
+        $sql = "select concat(table_name, '.', column_name) as foreign_key,
+            referenced_table_schema as db,
+            concat(referenced_table_name, '.', referenced_column_name) as field
+            from information_schema.key_column_usage
+            where table_schema = '{$this->database}' and referenced_table_name is not null";
+        $result = $this->db->query($sql);
+
+        $foreignKey = [];
+        foreach ($result as $item) {
+            $foreignKey[$item['foreign_key']] = $item['db'] == $this->database ? $item['field'] : ($item['db'] . '.' . $item['field']);
+        }
+        return $foreignKey;
+    }
+
+    /**
+     * 获取所有触发器
+     *
+     * @return array
+     */
+    public function getTrigger()
+    {
+        $sql = "show triggers";
+        $result = $this->db->query($sql);
+        $trigger = [];
+        foreach ($result as $item) {
+            $trigger[$item['Table']][] = [
+                'name' => $item['Trigger'],
+                'event' => $item['Event'],
+                'statement' => $item['Statement'],
+                'timing' => $item['Timing']
+            ];
+        }
+        return $trigger;
+    }
+
+    /**
+     * 获取所有非主键索引
+     *
+     * @return array
+     */
+    public function getIndex()
+    {
+        $sql = "select t.table_name,t.index_name,group_concat(t.column_name) as column_name,t.index_type,t.non_unique 
+                from
+                ( 
+                    select table_name,index_name,column_name,index_type,non_unique 
+                    from information_schema.statistics 
+                    where index_schema = '{$this->database}' and index_name <> 'primary' 
+                    order by index_name asc, seq_in_index asc 
+                ) t
+                group by t.table_name, t.index_name";
+        $result = $this->db->query($sql);
+        $index = array();
+        foreach ($result as $item) {
+            if (!isset($index[$item['table_name']])) $index[$item['table_name']] = [];
+            $index[$item['table_name']][] = $item;
+        }
+        return $index;
+    }
+
+    /**
+     * 获取文档内容
+     *
+     * @param array $columnDefaultComment
+     * @param array $exceptTable
+     * @return string
+     */
+    public function getDocument($columnDefaultComment = [], $exceptTable = [])
+    {
+        $this->exceptTable = $exceptTable;
+        $this->defaultComment = $columnDefaultComment;
+
+        ob_start();
+        include __DIR__ . '/resources/dict.php';
+        $html = ob_get_contents();
+        ob_clean();
+        return $html;
+    }
+
+
+    /**
+     * 生成表供应器
+     *
+     * @param string $path
+     * @param string $namespace
+     * @param array $tables
+     */
+    public function buildTableProvider($path, $namespace = 'Table', $tables = [])
+    {
+        if (!is_dir($path)) {
+            mkdir($path, true);
+        }
+        $tableInfo = $this->getTable();
+        $pks = $this->getPrimaryKey();
+        foreach ($tableInfo as $table) {
+            if (!empty($tables) && !in_array($table['table_name'], $tables)) {
+                continue;
+            }
+            $pkStr = "    public \$pk = '';";
+            $class = [
+                '<?php',
+                '/**',
+                '* ' . $table['table_name'],
+                '*',
+                '* User: ' . '系统自动生成',
+                '* Date: ' . date('Y-m-d'),
+                '* Time: ' . date('H:i'),
+                '*/',
+                '',
+                "namespace {$namespace};",
+                '',
+                'use Yeosz\Dtool\Table;',
+                ''
+            ];
+            $fileName = Provider::toHump($table['table_name'], true);
+            $class[] = "Class {$fileName}  extends Table";
+            $class[] = "{";
+            $class[] = "    public \$table = '{$table['table_name']}';";
+
+            $class[] = "    public \$columns = [";
+            foreach ($table['column'] as $column) {
+                $pk = $table['table_name'] . '.' . $column['column_name'];
+                if (in_array($pk, $pks) && $column['extra'] == 'auto_increment') {
+                    $pkStr = "    public \$pk = '{$column['column_name']}';";;
+                    continue;
+                } else {
+                    $class[] = "        '{$column['column_name']}' => " . $this->transform($column['data_type'], $column['column_type']) . ",";
+                }
+            }
+            $class[] = '    ];';
+            $class[] = $pkStr;
+            $class[] = '}';
+            $string = implode("\r\n", $class);
+            file_put_contents($path . '/' . $fileName . '.php', $string);
+        }
+    }
+
+    /**
+     * 根据数据库字段类型转换
+     *
+     * @param $dataType
+     * @param $columnType
+     * @return int|string
+     */
+    private function transform($dataType, $columnType)
+    {
+        $result = '';
+        $getInfo = function () use ($columnType){
+            $search = array_merge(range('a', 'z'), ['(', ')', "'"]);
+            $columnType = str_replace($search, '', $columnType);
+            return is_numeric($columnType) ? $columnType : explode(',', $columnType);
+        };
+        $getResult = function (){
+            $args = func_get_args();
+            return json_encode($args, JSON_UNESCAPED_UNICODE);
+        };
+        switch ($dataType){
+            case 'tinyint':
+            case 'smallint':
+            case 'mediumint':
+            case 'bigint':
+            case 'integer':
+            case 'int':
+                $result = $getResult($dataType);
+                break;
+            case 'float':
+            case 'double':
+            case 'decimal':
+                $info = $getInfo();
+                $info[1] = empty($info[1]) ? 2 : intval($info[1]);
+                $info[0] = empty($info[0]) ? 10 : ($info[0] - $info[1]);
+                $result = $getResult('randomFloat', $info[0], $info[1]);
+                break;
+            case 'char':
+                $result = $getResult('getString', $getInfo());
+                break;
+            case 'varchar':
+                $length = $getInfo();
+                $length = $length > 16 ? 16 : intval($length);
+                $result = $getResult('getString', $length);
+                break;
+            case 'tinytext':
+            case 'text':
+            case 'mediumtext':
+            case 'longtext':
+                $result = $getResult('getString', 32);
+                break;
+            case 'date':
+            case 'time':
+            case 'year':
+            case 'datetime':
+            case 'timestamp':
+                $result = $getResult($dataType);
+                break;
+            case 'set':
+            case 'enum':
+                $result = $getResult('randomValue', $getInfo());
+                break;
+            default:
+        }
+        return $result;
+    }
+
+}

@@ -1,0 +1,19 @@
+{
+    "name": "yeosz/dtool",
+    "authors": [
+        {
+            "name": "weihua",
+            "email": "ye.osz@qq.com"
+        }
+    ],
+    "description": "填充数据,数据供应器",
+    "keywords": ["数据填充","数据供应"],
+    "license": "MIT License",
+    "require": {"php": "^5.6 || ^7.0"},
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Yeosz\\Dtool\\": "src/"
+        }
+    }
+}
