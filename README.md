@@ -45,8 +45,6 @@ $data = [
 
 print_r($data);
 
-print_r($data);
-
 // 自增长
 $provider->addIncrement('sort', 1);
 var_dump($provider->sort);
@@ -80,7 +78,7 @@ $sql = "CREATE TABLE `dtool_test` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 $db->query($sql);
 
-$rows = $db->row("select * from dtool_test");
+$rows = $db->query("select * from dtool_test where " . $db->buildInCondition('id', [1,2,3,4], true) . " order by id desc");
 print_r($row);
 
 $row = $db->row("select id,name from dtool_test where id=:id", ['id'=>1]);
