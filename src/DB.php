@@ -121,6 +121,7 @@ class DB
         }
         try {
             $this->parameters = $parameters;
+
             $this->sQuery = $this->pdo->prepare($this->buildParams($query, $this->parameters));
 
             if (!empty($this->parameters)) {
@@ -267,5 +268,32 @@ class DB
     {
         $this->init($query, $params);
         return $this->sQuery->fetchColumn();
+    }
+
+    /**
+     * 拼接WHERE in条件
+     *
+     * @param string $field 字段
+     * @param string|array $condition 条件
+     * @param bool $isNumeric 是否数值,默认 true
+     * @return string
+     */
+    public function buildInCondition($field, $condition, $isNumeric = true)
+    {
+        if (is_string($condition)) {
+            $condition = explode(',', $condition);
+        }
+        if (empty($condition)) {
+            return "1=2";
+        }
+        if ($isNumeric) {
+            $condition = array_map('floatval', $condition);
+            $condition = array_unique($condition);
+            return count($condition) == 1 ? "{$field}={$condition[0]}" : "{$field} in (" . implode(',', $condition) . ")";
+        } else {
+            $condition = array_map('trim', $condition);
+            $condition = array_unique($condition);
+            return count($condition) == 1 ? "{$field}='{$condition[0]}'" : "{$field} in ('" . implode("','", $condition) . "')";
+        }
     }
 }

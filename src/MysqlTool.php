@@ -215,7 +215,7 @@ class MysqlTool
                 '',
                 "namespace {$namespace};",
                 '',
-                'use Yeosz\Dtool\Table;',
+                'use ' . __NAMESPACE__ . '\Table;',
                 ''
             ];
             $fileName = Provider::toHump($table['table_name'], true);

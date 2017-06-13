@@ -31,6 +31,10 @@ namespace Yeosz\Dtool;
  * @property int integer
  * @property string uuid
  * @property string ip
+ * @property string ean8
+ * @property string ean13
+ * @property string payment
+ * @property string bank
  */
 class Provider
 {
@@ -43,12 +47,14 @@ class Provider
         'first_name' => 'first.name.csv',
         'last_name' => 'last.name.csv',
         'area' => 'area.json',
+        'payment' => 'payment.csv',
+        'bank' => 'bank.csv',
     ];
 
     /**
-     * 属性对应
+     * 属性
      */
-    const PROPERTY_MATCH = [
+    private $property = [
         'name' => 'getName',
         'first_name' => 'getFirstName',
         'last_name' => 'getLastName',
@@ -64,6 +70,21 @@ class Provider
         'address' => 'getAddress',
         'uuid' => 'getUuid',
         'ip' => 'getIp',
+        'ean8' => 'getEan8',
+        'ean13' => 'getEan13',
+        'payment' => 'getPayment',
+        'bank' => 'getBank',
+        'tinyint' => 'Number::randomTinyint',
+        'smallint' => 'Number::randomSmallint',
+        'mediumint' => 'Number::randomMediumint',
+        'bigint' => 'Number::randomBigint',
+        'int' => 'Number::randomInt',
+        'integer' => 'Number::randomInt',
+        'datetime' => 'Datetime::datetime',
+        'timestamp' => 'Datetime::datetime',
+        'year' => 'Datetime::year',
+        'date' => 'Datetime::date',
+        'time' => 'Datetime::time',
     ];
 
     /**
@@ -122,7 +143,7 @@ class Provider
         } else {
             $content = file($path);
             $split = function ($value) {
-                return explode(',', $value);
+                return explode(',', trim($value));
             };
             if (count($content) == 1) {
                 $result = $split($content[0]);
@@ -418,6 +439,9 @@ class Provider
      */
     public function addProvider($key, $callback)
     {
+        if (isset($this->property[$key])) {
+            trigger_error('属性' . $key . '已经存在', E_USER_ERROR);
+        }
         $this->providers->$key = $callback;
     }
 
@@ -429,6 +453,9 @@ class Provider
      */
     public function addIncrement($key, $start = 0)
     {
+        if (isset($this->property[$key])) {
+            trigger_error('属性' . $key . '已经存在', E_USER_ERROR);
+        }
         $this->increments->$key = $start;
     }
 
@@ -464,6 +491,90 @@ class Provider
         $key = mt_rand(0, 9);
         $ip= long2ip(mt_rand($ipLong[$key][0], $ipLong[$key][1]));
         return $ip;
+    }
+
+    /**
+     * 获取定长数字
+     *
+     * @param int $length
+     * @return string
+     */
+    public function getNumber($length = 5)
+    {
+        $number = mt_rand(0, 9);
+        for ($i = 1; $i < $length; $i++) {
+            $number .= mt_rand(0, 9);
+        }
+        return $number;
+    }
+
+    /**
+     * 获取ean8
+     *
+     * @return string
+     */
+    public function getEan8()
+    {
+        $countryCode = [690, 691, 692, 693, 694, 695];
+        $barcode = $this->randomValue($countryCode) . $this->getNumber(4);
+        $barcode .= $this->getLastEan($barcode);
+        return $barcode;
+    }
+
+    /**
+     * 获取ean13
+     *
+     * @return string
+     */
+    public function getEan13()
+    {
+        $countryCode = [690, 691, 692, 693, 694, 695];
+        $barcode = $this->randomValue($countryCode) . $this->getNumber(9);
+        $barcode .= $this->getLastEan($barcode);
+        return $barcode;
+    }
+
+    /**
+     * 获取ean校验位
+     *
+     * @param $ean
+     * @return string
+     */
+    public function getLastEan($ean)
+    {
+        $length = strlen($ean);
+        $sum = 0;
+        for ($i = 0; $i < $length; $i++) {
+            $value = intval($ean{$i});
+            if ($i % 2 == 0) {
+                $sum += $sum;
+            } else {
+                $sum += $value * 3;
+            }
+        }
+        return strval((10 - $sum % 10) % 10);
+    }
+
+    /**
+     * 支付方式
+     *
+     * @return string
+     */
+    public function getPayment()
+    {
+        $resource = $this->getResource('payment');
+        return $this->randomValue($resource);
+    }
+
+    /**
+     * 银行
+     *
+     * @return string
+     */
+    public function getBank()
+    {
+        $resource = $this->getResource('bank');
+        return $this->randomValue($resource);
     }
 
     /**
@@ -509,21 +620,17 @@ class Provider
      */
     public function __get($name)
     {
-        $match = self::PROPERTY_MATCH;
-        if (isset($match[$name])) {
-            $method = $match[$name];
-            return $this->$method();
+        if (isset($this->property[$name])) {
+            $method = $this->property[$name];
+            if (stripos($method, '::')) {
+                return call_user_func(__NAMESPACE__ . '\\' . $method);
+            } else {
+                return $this->$method();
+            }
         } else if (isset($this->increments->$name)) {
             return $this->increments->$name++;
         } else if (isset($this->providers->$name)) {
             return call_user_func_array($this->providers->$name, []);
-        } else if (in_array($name, ['tinyint', 'smallint', 'mediumint', 'bigint', 'int', 'integer'])) {
-            if ($name == 'integer') $name = 'int';
-            $method = 'random' . ucfirst($name);
-            return call_user_func_array([$this->numberProvider, $method], []);
-        } else if (in_array($name, ['datetime', 'timestamp', 'year', 'date', 'time'])) {
-            if ($name == 'timestamp') $name = 'datetime';
-            return call_user_func_array([$this->datetimeProvider, $name], []);
         }
         return null;
     }
