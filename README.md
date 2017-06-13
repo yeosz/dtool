@@ -104,21 +104,11 @@ file_put_contents('./document.html', $tool->getDocument());
 
 // 生成表供应器
 $tool->buildTableProvider('./', 'Table');
-
-
-$table = new \Table\DtoolTest($db);
-
-$data = $table->generate();
-print_r($data);
-
-$new = $db->insert('dtool_test', $data);
-print_r($new);
-
-$news = $table->create(2);
-print_r($news);
 ```
 
 ### TableProvider
+
+- [DtoolTest](https://github.com/yeosz/dtool/blob/master/examples/DtoolTest.php)
 
 ```php
 
