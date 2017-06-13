@@ -5,6 +5,9 @@ require_once '../vendor/autoload.php';
 $provider = new \Yeosz\Dtool\Provider();
 
 $data = [
+    'string' => $provider->getString(10),
+    'mb_string' => $provider->getMbString(10),
+    'city' => $provider->city,
     'address' => $provider->address,
     'uuid' => $provider->uuid,
     'id_card' => $provider->id_card,
@@ -27,10 +30,11 @@ $data = [
     'time' => $provider->time,
     'integer' => $provider->integer,
     'random' => $provider->randomValue([1, 2, 3]),
+    'payment' => $provider->payment,
+    'bank' => $provider->bank,
 ];
-print_r($data);
-$provider->addIncrement('sort', 1);
 
+$provider->addIncrement('sort', 1);
 var_dump($provider->sort);
 var_dump($provider->sort);
 var_dump($provider->sort);
@@ -39,8 +43,9 @@ $provider->addProvider('my_time', function(){
     return time();
 });
 var_dump($provider->my_time);
+
 die;
-//$db = new Yeosz\Dtool\DB('localhost;port=3306', 'dtool', 'root', '');
+
 $db = new Yeosz\Dtool\DB('localhost;port=33060', 'homestead', 'homestead', 'secret');
 
 

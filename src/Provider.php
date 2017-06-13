@@ -17,6 +17,7 @@ namespace Yeosz\Dtool;
  * @property string bitmap_url
  * @property string company_name
  * @property string id_card
+ * @property string city
  * @property string address
  * @property string datetime
  * @property string timestamp
@@ -68,6 +69,7 @@ class Provider
         'company_name' => 'getCompanyName',
         'id_card' => 'getIdCard',
         'address' => 'getAddress',
+        'city' => 'getCity',
         'uuid' => 'getUuid',
         'ip' => 'getIp',
         'ean8' => 'getEan8',
@@ -427,6 +429,7 @@ class Provider
                 $ids[$area['id']] = $area['id'];
             }
         }
+        $ids = array_diff($ids, [110100, 120100, 139000, 419000, 429000, 469000, 500100, 500200, 659000]);
         $id = $this->randomValue($ids);
         return $regions[$id];
     }
