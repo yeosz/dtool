@@ -219,7 +219,7 @@ class MysqlTool
                 ''
             ];
             $fileName = Provider::toHump($table['table_name'], true);
-            $class[] = "Class {$fileName}  extends Table";
+            $class[] = "class {$fileName}  extends Table";
             $class[] = "{";
             $class[] = "    public \$table = '{$table['table_name']}';";
 
