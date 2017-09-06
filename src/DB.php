@@ -86,11 +86,11 @@ class DB
                 $this->dbUser,
                 $this->dbPassword,
                 array(
-                   \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
-                   \PDO::ATTR_EMULATE_PREPARES => false,
-                    //\PDO::ATTR_PERSISTENT => true, // 长链接
-                   \PDO::ATTR_ERRMODE =>\PDO::ERRMODE_EXCEPTION,
-                   \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true
+                    \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                    \PDO::ATTR_EMULATE_PREPARES => false,
+                    \PDO::ATTR_PERSISTENT => true, // 长链接
+                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                    \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true
                 )
             );
             $this->bConnected = true;
@@ -119,30 +119,33 @@ class DB
         if (!$this->bConnected) {
             $this->connect();
         }
+        $this->parameters = $parameters;
+
+        // 重连再试
         try {
-            $this->parameters = $parameters;
-
-            $this->sQuery = $this->pdo->prepare($this->buildParams($query, $this->parameters));
-
-            if (!empty($this->parameters)) {
-                if (array_key_exists(0, $parameters)) {
-                    $parametersType = true;
-                    array_unshift($this->parameters, "");
-                    unset($this->parameters[0]);
-                } else {
-                    $parametersType = false;
-                }
-                foreach ($this->parameters as $column => $value) {
-                    $this->sQuery->bindParam($parametersType ? intval($column) : ":" . $column, $this->parameters[$column]); //It would be query after loop end(before 'sQuery->execute()').It is wrong to use $value.
-                }
-            }
-
-            $this->sQuery->execute();
-            $this->queryCount ++;
+            $this->sQuery = @$this->pdo->prepare($this->buildParams($query, $this->parameters));
         } catch (\PDOException $e) {
-            trigger_error($e->getMessage() . ':' . $this->buildParams($query), E_USER_ERROR);
-            die();
+            if (strtolower($e->getCode()) == 'hy000') {
+                $this->connect();
+                $this->sQuery = $this->pdo->prepare($this->buildParams($query, $this->parameters));
+            }
         }
+
+        if (!empty($this->parameters)) {
+            if (array_key_exists(0, $parameters)) {
+                $parametersType = true;
+                array_unshift($this->parameters, '');
+                unset($this->parameters[0]);
+            } else {
+                $parametersType = false;
+            }
+            foreach ($this->parameters as $column => $value) {
+                $this->sQuery->bindParam($parametersType ? intval($column) : ':' . $column, $this->parameters[$column]);
+            }
+        }
+
+        $this->sQuery->execute();
+        $this->queryCount++;
 
         $this->parameters = array();
     }
@@ -196,9 +199,10 @@ class DB
      * @param $table
      * @param $insertRow
      * @param int|string|bool $returnPk
+     * @param bool $ignore
      * @return bool|int
      */
-    public function insert($table, $insertRow, $returnPk = 0)
+    public function insert($table, $insertRow, $returnPk = 0, $ignore = false)
     {
         $sql = [[], []];
         foreach ($insertRow as $key => $v) {
@@ -208,7 +212,8 @@ class DB
         $sql[0] = implode(',', $sql[0]);
         $sql[1] = implode(',', $sql[1]);
 
-        $result = $this->query("INSERT INTO {$table} ({$sql[0]}) VALUES ($sql[1])", $insertRow);
+        $ignoreStr = $ignore ? 'ignore' : '';
+        $result = $this->query("INSERT {$ignoreStr} INTO {$table} ({$sql[0]}) VALUES ($sql[1])", $insertRow);
         return empty($returnPk) ? $result : $this->lastInsertId();
     }
 
