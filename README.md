@@ -107,6 +107,8 @@ file_put_contents('./document.html', $tool->getDocument());
 $tool->buildTableProvider('./', 'Table');
 ```
 
+![image](https://raw.githubusercontent.com/yeosz/dtool/master/examples/doc.png)
+
 ### TableProvider
 
 - [DtoolTest](https://github.com/yeosz/dtool/blob/master/examples/DtoolTest.php)
