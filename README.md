@@ -127,7 +127,9 @@ $news = $table->create(2);
 print_r($news);
 ```
 
-### postman.js
+### Postman
+
+- [postman.js](https://github.com/yeosz/dtool/blob/master/src/resources/postman.js)
 
 接口调试时生成随机数据，方便测试（建议先压缩）
 
