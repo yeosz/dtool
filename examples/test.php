@@ -2,8 +2,8 @@
 
 require_once '../vendor/autoload.php';
 
+// Provider的使用
 $provider = new \Yeosz\Dtool\Provider();
-
 $data = [
     'string' => $provider->getString(10),
     'mb_string' => $provider->getMbString(10),
@@ -33,25 +33,24 @@ $data = [
     'payment' => $provider->payment,
     'bank' => $provider->bank,
 ];
+print_r($data);
 
 $provider->addIncrement('sort', 1);
 var_dump($provider->sort);
 var_dump($provider->sort);
 var_dump($provider->sort);
 
-$provider->addProvider('my_time', function(){
+$provider->addProvider('my_time', function () {
     return time();
 });
 var_dump($provider->my_time);
 
-die;
-
+// DB
+$database = 'homestead';
 $db = new Yeosz\Dtool\DB('localhost:33060', 'homestead', 'homestead', 'secret');
-
 
 $sql = "DROP TABLE IF EXISTS `dtool_test`";
 $db->query($sql);
-
 $sql = "CREATE TABLE `dtool_test` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(20) NOT NULL DEFAULT '',
@@ -66,14 +65,22 @@ $sql = "CREATE TABLE `dtool_test` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 $db->query($sql);
 
-include './DtoolTest.php';
 
+$tool = new Yeosz\Dtool\MysqlTool($db, $database);
+// 生成文档
+file_put_contents($database . '.html', $tool->getDocument());
+// 生成TableProvider
+$tool->buildTableProvider('./', '');
+
+// TableProvider的使用
+include './DtoolTest.php';
 $table = new DtoolTest($db);
 $data = $table->generate();
 $db->insert('dtool_test', $data);
 $table->create(2);
 
-$row = $db->query("select id,name from dtool_test where id=:id", ['id'=>1]);
+// sql查询
+$row = $db->query("select id,name from dtool_test where id=:id", ['id' => 1]);
 print_r($row);
 
 $column = $db->column("select name from dtool_test");
@@ -81,13 +88,4 @@ print_r($column);
 
 $cell = $db->cell("select name from dtool_test where id=?", [1]);
 print_r($cell);
-
-die;
-
-//$tool = new Yeosz\Dtool\MysqlTool($db, 'dtool');
-//echo $tool->getDocument();
-//$tool->buildTableProvider('./', 'Table');
-
-
-
 
