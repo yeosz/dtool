@@ -52,17 +52,18 @@ $db = new Yeosz\Dtool\DB('localhost:33060', 'homestead', 'homestead', 'secret');
 $sql = "DROP TABLE IF EXISTS `dtool_test`";
 $db->query($sql);
 $sql = "CREATE TABLE `dtool_test` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `username` varchar(20) NOT NULL DEFAULT '',
-  `name` varchar(20) NOT NULL DEFAULT '',
-  `sex` enum('2','1','0') NOT NULL,
-  `user_id` int(10) unsigned NOT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `address` varchar(60) NOT NULL DEFAULT '',
-  `remarks` varchar(128) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `username` varchar(20) NOT NULL DEFAULT '' COMMENT '用户名',
+  `name` varchar(20) NOT NULL DEFAULT '' COMMENT '真实姓名',
+  `sex` enum('2','1','0') NOT NULL COMMENT '性别:1男2女0未知',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'user id',
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '价格',
+  `address` varchar(60) NOT NULL DEFAULT '' COMMENT '地址',
+  `remarks` varchar(128) NOT NULL DEFAULT '' COMMENT '备注',
+  `created_at` timestamp NULL DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_username` (`username`) USING HASH
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;";
 $db->query($sql);
 
 
