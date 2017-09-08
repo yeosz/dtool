@@ -14,7 +14,7 @@ class Datetime
      */
     public static function year($start = 1900, $end = 2100)
     {
-        return strval(mt_rand(intval($$start), intval($end)));
+        return strval(mt_rand(intval($start), intval($end)));
     }
 
     /**

@@ -46,7 +46,7 @@ var_dump($provider->my_time);
 
 die;
 
-$db = new Yeosz\Dtool\DB('localhost;port=33060', 'homestead', 'homestead', 'secret');
+$db = new Yeosz\Dtool\DB('localhost:33060', 'homestead', 'homestead', 'secret');
 
 
 $sql = "DROP TABLE IF EXISTS `dtool_test`";

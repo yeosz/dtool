@@ -213,7 +213,7 @@ class MysqlTool
                 '* Time: ' . date('H:i'),
                 '*/',
                 '',
-                "namespace {$namespace};",
+                $namespace ? "namespace {$namespace};" : '',
                 '',
                 'use ' . __NAMESPACE__ . '\Table;',
                 ''
