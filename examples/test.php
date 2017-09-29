@@ -82,16 +82,16 @@ $tool->buildTableProvider('./tp/', 'TableProvider');
 // omposer.json修改autoload部分,增加命名空间
 $table = new \TableProvider\DtoolTest();
 $data = $table->generate();
-$db->insert('dtool_test', $data);
+$table->db->insert('dtool_test', $data);
 $table->create(2);
 
 // sql查询
-$row = $db->query("select id,name from dtool_test where id=:id", ['id' => 1]);
+$row = $table->db->query("select id,name from dtool_test where id=:id", ['id' => 1]);
 print_r($row);
 
-$column = $db->column("select name from dtool_test");
+$column = $table->db->column("select name from dtool_test");
 print_r($column);
 
-$cell = $db->cell("select name from dtool_test where id=?", [1]);
+$cell = $table->db->cell("select name from dtool_test where id=?", [1]);
 print_r($cell);
 

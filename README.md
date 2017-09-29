@@ -44,6 +44,10 @@ $data = [
     'random' => $provider->randomValue([1, 2, 3]),
     'payment' => $provider->payment,
     'bank' => $provider->bank,
+    'color_name' => $provider->color_name,
+    'color_hex' => $provider->color_hex,
+    'color_rgb' => $provider->color_rgb,
+    'version' => $provider->version,   
 ];
 
 print_r($data);
@@ -105,26 +109,21 @@ $tool = new Yeosz\Dtool\MysqlTool($db, 'homestead');
 file_put_contents('./document.html', $tool->getDocument());
 
 // 生成表供应器
-$tool->buildTableProvider('./', 'Table');
+$tool->buildTableProvider('./tp/', 'TableProvider');
 ```
 
 ![image](https://raw.githubusercontent.com/yeosz/dtool/master/examples/doc.png)
 
 ### TableProvider
 
-- [DtoolTest](https://github.com/yeosz/dtool/blob/master/examples/DtoolTest.php)
+- [DtoolTest](https://github.com/yeosz/dtool/blob/master/examples/tp/DtoolTest.php)
 
 ```php
-$db = new Yeosz\Dtool\DB('localhost:33060', 'homestead', 'homestead', 'secret');
-$table = new \Table\DtoolTest($db);
-
+// omposer.json修改autoload部分,增加命名空间
+$table = new \TableProvider\DtoolTest();
 $data = $table->generate();
-print_r($data);
-$new = $db->insert('dtool_test', $data);
-print_r($new);
-
-$news = $table->create(2);
-print_r($news);
+$table->db->insert('dtool_test', $data);
+$table->create(2);
 ```
 
 ### Postman
