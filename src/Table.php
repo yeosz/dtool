@@ -39,6 +39,11 @@ class Table
      * @var array
      */
     public $columns = [];
+    
+    /**
+     * @var DB
+     */
+    public $db;
 
     /**
      * @var array
@@ -49,11 +54,6 @@ class Table
      * @var array
      */
     protected $methods = [];
-
-    /**
-     * @var DB
-     */
-    protected $db;
 
     /**
      * Table constructor.
