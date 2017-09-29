@@ -80,7 +80,7 @@ $tool->buildTableProvider('./tp/', 'TableProvider');
 // TableProvider的使用
 
 // omposer.json修改autoload部分,增加命名空间
-$table = new \TableProvider\DtoolTest($db);
+$table = new \TableProvider\DtoolTest();
 $data = $table->generate();
 $db->insert('dtool_test', $data);
 $table->create(2);
