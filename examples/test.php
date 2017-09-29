@@ -94,4 +94,3 @@ print_r($column);
 
 $cell = $table->db->cell("select name from dtool_test where id=?", [1]);
 print_r($cell);
-
