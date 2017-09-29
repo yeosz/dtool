@@ -191,11 +191,40 @@ class MysqlTool
      * @param string $namespace
      * @param array $tables
      */
-    public function buildTableProvider($path, $namespace = 'Table', $tables = [])
+    public function buildTableProvider($path, $namespace, $tables = [])
     {
         if (!is_dir($path)) {
             mkdir($path, true);
         }
+
+        $baseClass = [
+            '<?php',
+            '/**',
+            '* Base',
+            '*',
+            '* User: ' . '系统自动生成',
+            '* Date: ' . date('Y-m-d'),
+            '* Time: ' . date('H:i'),
+            '*/',
+            '',
+            $namespace ? "namespace {$namespace};" : '',
+            '',
+            'use ' . __NAMESPACE__ . '\Table;',
+            'use ' . __NAMESPACE__ . '\DB;',
+            '',
+            "class Base  extends Table",
+            '{',
+            '    protected $dbConfig = "' . base64_encode(serialize($this->db)) . '";',
+            '',
+            '    public function __construct(DB $db = null)',
+            '    {',
+            '        if (empty($db)) $db = unserialize(base64_decode($this->dbConfig));',
+            '        parent::__construct($db);',
+            '    }',
+            '}',
+        ];
+        file_put_contents($path . '/Base.php', implode("\r\n", $baseClass));
+
         $tableInfo = $this->getTable();
         $pks = $this->getPrimaryKey();
         foreach ($tableInfo as $table) {
@@ -215,11 +244,9 @@ class MysqlTool
                 '',
                 $namespace ? "namespace {$namespace};" : '',
                 '',
-                'use ' . __NAMESPACE__ . '\Table;',
-                ''
             ];
             $fileName = Provider::toHump($table['table_name'], true);
-            $class[] = "class {$fileName}  extends Table";
+            $class[] = "class {$fileName}  extends Base";
             $class[] = "{";
             $class[] = "    public \$table = '{$table['table_name']}';";
 

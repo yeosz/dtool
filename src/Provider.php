@@ -36,6 +36,10 @@ namespace Yeosz\Dtool;
  * @property string ean13
  * @property string payment
  * @property string bank
+ * @property string color_name
+ * @property string color_hex
+ * @property string color_rgb
+ * @property string version
  */
 class Provider
 {
@@ -50,6 +54,7 @@ class Provider
         'area' => 'area.json',
         'payment' => 'payment.csv',
         'bank' => 'bank.csv',
+        'color' => 'color.json',
     ];
 
     /**
@@ -87,6 +92,10 @@ class Provider
         'year' => 'Datetime::year',
         'date' => 'Datetime::date',
         'time' => 'Datetime::time',
+        'color_name' => 'getColorName',
+        'color_hex' => 'getColorHex',
+        'color_rgb' => 'getColorRgb',
+        'version' => 'getVersion',
     ];
 
     /**
@@ -636,5 +645,51 @@ class Provider
             return call_user_func_array($this->providers->$name, []);
         }
         return null;
+    }
+
+    /**
+     * 颜色名称
+     *
+     * @return string
+     */
+    public function getColorName()
+    {
+        $resource = $this->getResource('color');
+        $color = $this->randomValue($resource);
+        return $color[0];
+    }
+
+    /**
+     * hex颜色
+     *
+     * @return string
+     */
+    public function getColorHex()
+    {
+        $resource = $this->getResource('color');
+        $color = $this->randomValue($resource);
+        return $color[1];
+    }
+
+    /**
+     * rgb颜色
+     *
+     * @return string
+     */
+    public function getColorRgb()
+    {
+        $resource = $this->getResource('color');
+        $color = $this->randomValue($resource);
+        return $color[2];
+    }
+
+    /**
+     * 版本号
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return mt_rand(0, 9) . '.' . mt_rand(0, 20) . '.' . mt_rand(0, 20);
     }
 }

@@ -89,6 +89,7 @@ class Table
             $data = $this->generate($closure);
             $result = $this->db->insert($this->table, $data, $this->pk);
             if ($this->pk) {
+                if(!isset($data[$this->pk])) $data[$this->pk] = $result;
                 $row[$result] = $data;
             } else {
                 $row[] = $data;

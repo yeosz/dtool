@@ -120,7 +120,7 @@ class DB
             $this->connect();
         }
         $this->parameters = $parameters;
-
+        
         // 重连再试
         try {
             $this->sQuery = @$this->pdo->prepare($this->buildParams($query, $this->parameters));
@@ -300,5 +300,15 @@ class DB
             $condition = array_unique($condition);
             return count($condition) == 1 ? "{$field}='{$condition[0]}'" : "{$field} in ('" . implode("','", $condition) . "')";
         }
+    }
+
+    public function __sleep()
+    {
+        return array('host', 'dbName', 'dbUser', 'dbPassword');
+    }
+
+    public function __wakeup()
+    {
+        $this->connect();
     }
 }

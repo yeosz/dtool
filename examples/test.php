@@ -31,7 +31,11 @@ $data = [
     'integer' => $provider->integer,
     'random' => $provider->randomValue([1, 2, 3]),
     'payment' => $provider->payment,
-    'bank' => $provider->bank,
+    'color_name' => $provider->color_name,
+    'color_hex' => $provider->color_hex,
+    'color_rgb' => $provider->color_rgb,
+    'version' => $provider->version,   
+    
 ];
 print_r($data);
 
@@ -71,11 +75,12 @@ $tool = new Yeosz\Dtool\MysqlTool($db, $database);
 // 生成文档
 file_put_contents($database . '.html', $tool->getDocument());
 // 生成TableProvider
-$tool->buildTableProvider('./', '');
+$tool->buildTableProvider('./tp/', 'TableProvider');
 
 // TableProvider的使用
-include './DtoolTest.php';
-$table = new DtoolTest($db);
+
+// omposer.json修改autoload部分,增加命名空间
+$table = new \TableProvider\DtoolTest($db);
 $data = $table->generate();
 $db->insert('dtool_test', $data);
 $table->create(2);
