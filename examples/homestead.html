@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>homestead数据库设计</title>
+    <style>
+    body, td, th { font-family: "微软雅黑"; font-size: 14px; }
+    .warp{margin:auto; width:80%;}
+    .warp h3{margin:0; padding:0; line-height:30px; margin-top:10px;}
+    table { border-collapse: collapse; border: 1px solid #000; background: #efefef; margin-bottom:20px; }
+    table thead th { background-color:#d3d3d3;text-align: left; font-weight: bold; height: 30px; line-height: 30px; font-size: 16px; border: 1px solid #000; padding:5px;}
+    table thead td { background-color:#d3d3d3;text-align: left; font-weight: bold; height: 26px; line-height: 26px; font-size: 14px; text-align:center; border: 1px solid #000; padding:5px; color:grey;}
+    table td { height: 20px; font-size: 14px; border: 1px solid #000; background-color: #fff; padding:5px;}
+    .w120 { width: 120px; }
+    .w80 { width: 80px; }
+    .w50 { width: 50px; }
+    .w300 { width: 300px; }
+    .text-center{text-align:center;}
+    </style>
+</head>
+<body>
+    <div class="warp">
+        <h1 style="text-align:center;">homestead数据库设计</h1>
+        
+<table><thead><tr><th colspan="8">1&nbsp;dtool_test&nbsp;</th><th>InnoDB</th></tr><tr><td>序号</td><td>字段名</td><td>数据类型</td><td>默认值</td><td>允许非空</td><td>自动递增</td><td>是否主键</td><td>外键关系</td><td>备注</td></tr></thead><tbody><tr><td class="w50 text-center">1</td><td class="w120">id</td><td class="w120">int(10) unsigned</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">是</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">ID</td></tr><tr><td class="w50 text-center">2</td><td class="w120">username</td><td class="w120">varchar(20)</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">用户名</td></tr><tr><td class="w50 text-center">3</td><td class="w120">name</td><td class="w120">varchar(20)</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">真实姓名</td></tr><tr><td class="w50 text-center">4</td><td class="w120">sex</td><td class="w120">enum('2','1','0')</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">性别:1男2女0未知</td></tr><tr><td class="w50 text-center">5</td><td class="w120">user_id</td><td class="w120">int(10) unsigned</td><td class="w80 text-center">0</td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">user id</td></tr><tr><td class="w50 text-center">6</td><td class="w120">price</td><td class="w120">decimal(10,2)</td><td class="w80 text-center">0.00</td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">价格</td></tr><tr><td class="w50 text-center">7</td><td class="w120">address</td><td class="w120">varchar(60)</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">地址</td></tr><tr><td class="w50 text-center">8</td><td class="w120">remarks</td><td class="w120">varchar(128)</td><td class="w80 text-center"></td><td class="w80 text-center">NO</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">备注</td></tr><tr><td class="w50 text-center">9</td><td class="w120">created_at</td><td class="w120">timestamp</td><td class="w80 text-center"></td><td class="w80 text-center">YES</td><td class="w80 text-center">&nbsp;</td><td class="w80 text-center"></td><td class="w300"></td><td class="w300">创建时间</td></tr></tbody><thead><tr><td colspan="2">索引名称</td><td>唯一索引</td><td>索引类型</td><td colspan="5">字段</td></tr></thead><tbody><tr><td colspan="2" class="w120">unique_username</td><td class="w80 text-center">是</td><td class="w120 text-center">BTREE</td><td colspan="5">username</td></tr></tbody></table>
+    </div>
+</body>
+</html>
