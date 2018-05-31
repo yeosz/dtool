@@ -40,6 +40,8 @@ namespace Yeosz\Dtool;
  * @property string color_hex
  * @property string color_rgb
  * @property string version
+ * @property string country
+ * @property string university
  */
 class Provider
 {
@@ -55,6 +57,8 @@ class Provider
         'payment' => 'payment.csv',
         'bank' => 'bank.csv',
         'color' => 'color.json',
+        'country' => 'country.csv',
+        'university' => 'university.csv',
     ];
 
     /**
@@ -96,6 +100,8 @@ class Provider
         'color_hex' => 'getColorHex',
         'color_rgb' => 'getColorRgb',
         'version' => 'getVersion',
+        'country' => 'getCountry',
+        'university' => 'getUniversity',
     ];
 
     /**
@@ -501,7 +507,7 @@ class Provider
             array('-569376768', '-564133889'), //222.16.0.0-222.95.255.255
         );
         $key = mt_rand(0, 9);
-        $ip= long2ip(mt_rand($ipLong[$key][0], $ipLong[$key][1]));
+        $ip = long2ip(mt_rand($ipLong[$key][0], $ipLong[$key][1]));
         return $ip;
     }
 
@@ -614,7 +620,8 @@ class Provider
      * @param string $string
      * @return mixed
      */
-    public static function toUnderline($string){
+    public static function toUnderline($string)
+    {
         $string = preg_replace_callback(
             '/([A-Z]{1})/',
             function ($matches) {
@@ -691,5 +698,27 @@ class Provider
     public function getVersion()
     {
         return mt_rand(0, 9) . '.' . mt_rand(0, 20) . '.' . mt_rand(0, 20);
+    }
+
+    /**
+     * 国家
+     *
+     * @return string
+     */
+    public function getCountry()
+    {
+        $resource = $this->getResource('country');
+        return $this->randomValue($resource);
+    }
+
+    /**
+     * 大学
+     *
+     * @return string
+     */
+    public function getUniversity()
+    {
+        $resource = $this->getResource('university');
+        return $this->randomValue($resource);
     }
 }

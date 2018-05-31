@@ -120,7 +120,7 @@ class DB
             $this->connect();
         }
         $this->parameters = $parameters;
-        
+
         // 重连再试
         try {
             $this->sQuery = @$this->pdo->prepare($this->buildParams($query, $this->parameters));

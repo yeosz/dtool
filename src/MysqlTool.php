@@ -278,16 +278,16 @@ class MysqlTool
     private function transform($dataType, $columnType)
     {
         $result = '';
-        $getInfo = function () use ($columnType){
+        $getInfo = function () use ($columnType) {
             $search = array_merge(range('a', 'z'), ['(', ')', "'"]);
             $columnType = str_replace($search, '', $columnType);
             return is_numeric($columnType) ? $columnType : explode(',', $columnType);
         };
-        $getResult = function (){
+        $getResult = function () {
             $args = func_get_args();
             return json_encode($args, JSON_UNESCAPED_UNICODE);
         };
-        switch ($dataType){
+        switch ($dataType) {
             case 'tinyint':
             case 'smallint':
             case 'mediumint':
