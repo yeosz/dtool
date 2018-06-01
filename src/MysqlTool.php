@@ -212,7 +212,7 @@ class MysqlTool
             'use ' . __NAMESPACE__ . '\Table;',
             'use ' . __NAMESPACE__ . '\DB;',
             '',
-            "class Base  extends Table",
+            "class Base extends Table",
             '{',
             '    protected $dbConfig = "' . base64_encode(serialize($this->db)) . '";',
             '',
@@ -246,7 +246,7 @@ class MysqlTool
                 '',
             ];
             $fileName = Provider::toHump($table['table_name'], true);
-            $class[] = "class {$fileName}  extends Base";
+            $class[] = "class {$fileName} extends Base";
             $class[] = "{";
             $class[] = "    public \$table = '{$table['table_name']}';";
 
