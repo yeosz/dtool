@@ -8,7 +8,7 @@
     ],
     "description": "填充数据,数据供应器",
     "keywords": ["数据填充","数据供应"],
-    "license": "MIT License",
+    "license": "MIT",
     "require": {"php": "^5.6 || ^7.0"},
     "minimum-stability": "dev",
     "autoload": {
