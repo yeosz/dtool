@@ -304,7 +304,7 @@ class DB
 
     public function __sleep()
     {
-        return array('host', 'dbName', 'dbUser', 'dbPassword');
+        return ['host', 'dbName', 'dbUser', 'dbPassword'];
     }
 
     public function __wakeup()

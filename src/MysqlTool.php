@@ -37,7 +37,7 @@ class MysqlTool
     {
         $this->database = $database;
         $this->db = $db;
-        $this->db->query('set sql_mode ="strict_trans_tables,no_zero_in_date,no_zero_date,error_for_division_by_zero,no_auto_create_user,no_engine_substitution";');
+        $this->db->query('set sql_mode ="strict_trans_tables,no_zero_in_date,no_zero_date,error_for_division_by_zero,no_engine_substitution";');
     }
 
     /**
@@ -56,14 +56,11 @@ class MysqlTool
         $sql = 'select ' . implode($field, ',') . ' from information_schema.tables where table_schema="' . $this->database . '"';
         $result = $this->db->query($sql);
 
+        $result = $this->keyToLower($result);
         $tables = [];
         foreach ($result as $item) {
             if (!in_array($item['table_name'], $this->exceptTable)) {
-                $tables[] = [
-                    'table_name' => $item['table_name'],
-                    'table_comment' => $item['table_comment'],
-                    'table_type' => $item['table_type'],
-                    'engine' => $item['engine']];
+                $tables[] = $item;
             }
         }
 
@@ -74,7 +71,7 @@ class MysqlTool
                     from information_schema.columns
                     where table_name = '{$value['table_name']}' and table_schema = '{$this->database}'";
             $result = $this->db->query($sql);
-            $tables[$key]['column'] = $result;
+            $tables[$key]['column'] = $this->keyToLower($result);
         }
         return $tables;
     }
@@ -90,6 +87,7 @@ class MysqlTool
             from information_schema.key_column_usage 
             where constraint_name='primary' and table_schema='{$this->database}'";
         $result = $this->db->query($sql);
+        $result = $this->keyToLower($result);
         $primary = [];
         foreach ($result as $item) {
             $primary[] = $item['table_name'] . '.' . $item['column_name'];
@@ -110,7 +108,7 @@ class MysqlTool
             from information_schema.key_column_usage
             where table_schema = '{$this->database}' and referenced_table_name is not null";
         $result = $this->db->query($sql);
-
+        $result = $this->keyToLower($result);
         $foreignKey = [];
         foreach ($result as $item) {
             $foreignKey[$item['foreign_key']] = $item['db'] == $this->database ? $item['field'] : ($item['db'] . '.' . $item['field']);
@@ -127,13 +125,14 @@ class MysqlTool
     {
         $sql = "show triggers";
         $result = $this->db->query($sql);
+        $result = $this->keyToLower($result);
         $trigger = [];
         foreach ($result as $item) {
-            $trigger[$item['Table']][] = [
-                'name' => $item['Trigger'],
-                'event' => $item['Event'],
-                'statement' => $item['Statement'],
-                'timing' => $item['Timing']
+            $trigger[$item['table']][] = [
+                'name' => $item['trigger'],
+                'event' => $item['event'],
+                'statement' => $item['statement'],
+                'timing' => $item['timing']
             ];
         }
         return $trigger;
@@ -156,6 +155,7 @@ class MysqlTool
                 ) t
                 group by t.table_name, t.index_name";
         $result = $this->db->query($sql);
+        $result = $this->keyToLower($result);
         $index = array();
         foreach ($result as $item) {
             if (!isset($index[$item['table_name']])) $index[$item['table_name']] = [];
@@ -200,12 +200,12 @@ class MysqlTool
         $baseClass = [
             '<?php',
             '/**',
-            '* Base',
-            '*',
-            '* User: ' . '系统自动生成',
-            '* Date: ' . date('Y-m-d'),
-            '* Time: ' . date('H:i'),
-            '*/',
+            ' * Base',
+            ' *',
+            ' * User: ' . '系统自动生成',
+            ' * Date: ' . date('Y-m-d'),
+            ' * Time: ' . date('H:i'),
+            ' */',
             '',
             $namespace ? "namespace {$namespace};" : '',
             '',
@@ -246,7 +246,7 @@ class MysqlTool
                 '',
             ];
             $fileName = Provider::toHump($table['table_name'], true);
-            $class[] = "class {$fileName} extends Base";
+            $class[] = "class {$fileName}  extends Base";
             $class[] = "{";
             $class[] = "    public \$table = '{$table['table_name']}';";
 
@@ -277,7 +277,6 @@ class MysqlTool
      */
     private function transform($dataType, $columnType)
     {
-        $result = '';
         $getInfo = function () use ($columnType) {
             $search = array_merge(range('a', 'z'), ['(', ')', "'"]);
             $columnType = str_replace($search, '', $columnType);
@@ -329,9 +328,29 @@ class MysqlTool
             case 'enum':
                 $result = $getResult('randomValue', $getInfo());
                 break;
+            case 'json':
+                $result = "'{}'";
+                break;
             default:
+                $result = "null";
         }
         return $result;
     }
 
+    /**
+     * KEY转小写
+     *
+     * @param $arr
+     * @return array
+     */
+    protected function keyToLower($arr)
+    {
+        $result = [];
+        foreach ($arr as $key => $value) {
+            $key = is_numeric($key) ? $key : strtolower($key);
+            $value = is_array($value) ? $this->keyToLower($value) : $value;
+            $result[$key] = $value;
+        }
+        return $result;
+    }
 }
