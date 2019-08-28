@@ -11,7 +11,7 @@ composer require "yeosz/dtool"
 
 ## 使用
 
-### Provider
+### Provider 数据供给器
 
 ```php
 $provider = new \Yeosz\Dtool\Provider();
@@ -65,7 +65,7 @@ $provider->addProvider('my_time', function(){
 var_dump($provider->my_time);
 ```
 
-### DB
+### DB PDO封装
 
 ```php
 
@@ -99,7 +99,7 @@ $cell = $db->cell("select name from dtool_test where id=?", [1]);
 print_r($cell);
 ```
 
-### MysqlTool
+### MysqlTool MySQL工具
 
 ```php
 $db = new Yeosz\Dtool\DB('localhost:33060', 'homestead', 'homestead', 'secret');
@@ -108,22 +108,34 @@ $tool = new Yeosz\Dtool\MysqlTool($db, 'homestead');
 // 生成文档
 file_put_contents('./document.html', $tool->getDocument());
 
-// 生成表供应器
+// 生成表数据供应器
 $tool->buildTableProvider('./tp/', 'TableProvider');
 ```
 
 ![image](https://raw.githubusercontent.com/yeosz/dtool/master/examples/doc.png)
 
-### TableProvider
+### TableProvider 表数据供给器
 
 - [DtoolTest](https://github.com/yeosz/dtool/blob/master/examples/tp/DtoolTest.php)
 
 ```php
 // omposer.json修改autoload部分,增加命名空间
 $table = new \TableProvider\DtoolTest();
-$data = $table->generate();
+$data = $table->generate(); // 生成数据,但不插入数据库
 $table->db->insert('dtool_test', $data);
-$table->create(2);
+$table->create(2); // 生成数据,并插入数据库
+```
+
+### MysqlCompare 结构同步
+
+```php
+
+$db1 = new Yeosz\Dtool\DB('localhost', 'demo1', 'homestead', 'secret');
+$db2 = new Yeosz\Dtool\DB('localhost', 'demo2', 'homestead', 'secret');
+
+$diff = new \Yeosz\Dtool\MysqlCompare($db2, $db1);
+$diff->showSql();
+
 ```
 
 ### Postman

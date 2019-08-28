@@ -4,6 +4,10 @@ namespace Yeosz\Dtool;
 
 class MysqlCompare
 {
+    const TEMPLATE = '-- ----------------------------
+-- %s
+-- ----------------------------';
+
     /**
      * @var DB
      */
@@ -23,6 +27,17 @@ class MysqlCompare
     {
         $this->target = $target;
         $this->source = $source;
+    }
+
+    /**
+     * 反转目标及源数据库
+     *
+     * @return $this
+     */
+    public function reverse()
+    {
+        list($this->target, $this->source) = [$this->source, $this->target];
+        return $this;
     }
 
     /**
@@ -47,8 +62,6 @@ class MysqlCompare
     /**
      * 结构同步的SQL 仅代参考
      * 程序无法识别字段名或索引名称的修改,请人工甄别,并注意SQL执行顺序
-     *
-     * @return array
      */
     public function showSql()
     {
@@ -56,7 +69,23 @@ class MysqlCompare
         $targetInfo = $this->getDbInfo($this->target);
         $diff = $this->getDbDiff($targetInfo[0], $sourceInfo[0]);
         $result = $this->getSyncSql($diff, $sourceInfo[0], $sourceInfo[1]);
-        return $result;
+
+        $source = $this->source->getConnectInfo();
+        $target = $this->target->getConnectInfo();
+        echo '/*' . PHP_EOL;
+        echo 'MySQL数据库结构比对' . PHP_EOL . PHP_EOL;
+        echo '源  : ' . $source['host'] . "\t" . $source['name'] . PHP_EOL;
+        echo '目标: ' . $target['host'] . "\t" . $target['name'] . PHP_EOL . PHP_EOL;
+        echo 'Date: ' . date('Y-m-d H:i:s') . PHP_EOL;
+        echo '*/' . PHP_EOL . PHP_EOL;
+        echo 'SET FOREIGN_KEY_CHECKS=0;' . PHP_EOL . PHP_EOL;
+        foreach ($result as $table => $item) {
+            echo sprintf(self::TEMPLATE, $table) . PHP_EOL;
+            foreach ($item as $value) {
+                echo $value . ';' . PHP_EOL;
+            }
+        }
+
     }
 
     /**

@@ -302,6 +302,16 @@ class DB
         }
     }
 
+    /**
+     * 获取连接的信息
+     *
+     * @return array
+     */
+    public function getConnectInfo()
+    {
+        return ['host' => $this->host, 'name' => $this->dbName, 'user' => $this->dbUser];
+    }
+
     public function __sleep()
     {
         return ['host', 'dbName', 'dbUser', 'dbPassword'];
