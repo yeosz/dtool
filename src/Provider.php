@@ -721,4 +721,21 @@ class Provider
         $resource = $this->getResource('university');
         return $this->randomValue($resource);
     }
+
+    /**
+     * 区间值
+     *
+     * @param int $start 开始值
+     * @param int $end 结束值
+     * @param int $divisor 除数
+     * @return float|int
+     */
+    public function between($start = 0, $end = 2147483647, $divisor = 0)
+    {
+        $number = mt_rand($start, $end);
+        if ($divisor) {
+            $number = $number / $divisor;
+        }
+        return $number;
+    }
 }

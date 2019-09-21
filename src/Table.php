@@ -130,7 +130,10 @@ class Table
         }
 
         if ($closure) {
-            $this->current = $closure($this->current);
+            $result = $closure($this->current);
+            if (!is_null($result)) {
+                $this->current = $result;
+            }
         }
 
         return $this->current;

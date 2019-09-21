@@ -47,10 +47,16 @@ $data = [
     'color_name' => $provider->color_name,
     'color_hex' => $provider->color_hex,
     'color_rgb' => $provider->color_rgb,
-    'version' => $provider->version,   
+    'version' => $provider->version,
+    'between' => $provider->between(11, 99, 1000),
 ];
 
 print_r($data);
+
+// 数字供应器 numberProvider
+$provider->numberProvider->randomMediumint();
+// 时间供应器 datetimeProvider
+$provider->datetimeProvider->time();
 
 // 自增长
 $provider->addIncrement('sort', 1);
@@ -124,6 +130,34 @@ $table = new \TableProvider\DtoolTest();
 $data = $table->generate(); // 生成数据,但不插入数据库
 $table->db->insert('dtool_test', $data);
 $table->create(2); // 生成数据,并插入数据库
+// generate和create都可以传入一个闭包参数,对数据进行修改
+$data = $table->generate(function ($current){
+    $current['user_id'] = mt_rand(111,999);
+    return $current;
+});
+
+// 表也可以针对某列自定义数据供应器 方法名以dataProvider开头
+class DtoolTest  extends Base
+{
+    public $table = 'dtool_test';
+    public $columns = [
+        'username' => ["getString",16],
+        'name' => ["getString",16],
+        'sex' => ["randomValue",["2","1","0"]],
+        'user_id' => ["custom_user_id"],
+        'price' => ["randomFloat",8,2],
+        'address' => ["getString",16],
+        'remarks' => ["getString",16],
+        'created_at' => ["timestamp"],
+    ];
+    public $pk = 'id';
+    
+    public function dataProviderCustomUserId()
+    {
+        return mt_rand(111,999);
+    }
+}
+
 ```
 
 ### MysqlCompare 结构同步
