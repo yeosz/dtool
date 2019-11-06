@@ -325,7 +325,7 @@ class Provider
      */
     public function getImageUrl($width = 200, $height = 200)
     {
-        return "http://lorempixel.com/{$width}/{$height}/";
+        return "http://lorempixel.com/g/{$width}/{$height}/";
     }
 
     /**
@@ -339,7 +339,7 @@ class Provider
     public function getBitmapUrl($width = 200, $height = 200, $txt = 'image')
     {
         $txtSize = $txt ? floor($width / strlen($txt)) : 25;
-        return "https://placeholdit.imgix.net/~text?txtsize={$txtSize}&txt={$txt}&w={$width}&h={$height}";
+        return "https://via.placeholder.com/{$width}x{$height}.png?text={$txt}";
     }
 
     /**
