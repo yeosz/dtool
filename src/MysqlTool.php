@@ -145,22 +145,31 @@ class MysqlTool
      */
     public function getIndex()
     {
-        $sql = "select t.table_name,t.index_name,group_concat(t.column_name) as column_name,t.index_type,t.non_unique 
-                from
-                ( 
-                    select table_name,index_name,column_name,index_type,non_unique 
-                    from information_schema.statistics 
-                    where index_schema = '{$this->database}' and index_name <> 'primary' 
-                    order by index_name asc, seq_in_index asc 
-                ) t
-                group by t.table_name, t.index_name";
+        $sql = "select table_name,index_name,column_name,index_type,non_unique 
+                from information_schema.statistics 
+                where index_schema = '{$this->database}' and index_name <> 'primary' 
+                order by index_name asc, seq_in_index asc";
         $result = $this->db->query($sql);
         $result = $this->keyToLower($result);
+
+        $map = [];
+        foreach ($result as $key => $item) {
+            if (!isset($map[$item['index_name']])) {
+                $map[$item['index_name']] = $key;
+            } else {
+                $id = $map[$item['index_name']];
+                $result[$id]['column_name'] = $result[$id]['column_name'] . ',' . $item['column_name'];
+                unset($result[$key]);
+            }
+        }
+
         $index = array();
         foreach ($result as $item) {
             if (!isset($index[$item['table_name']])) $index[$item['table_name']] = [];
             $index[$item['table_name']][] = $item;
         }
+
+
         return $index;
     }
 
