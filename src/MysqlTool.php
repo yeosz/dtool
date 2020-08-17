@@ -83,14 +83,14 @@ class MysqlTool
      */
     public function getPrimaryKey()
     {
-        $sql = "select table_name,column_name
+        $sql = "select table_schema,table_name,column_name
             from information_schema.key_column_usage 
             where constraint_name='primary' and table_schema='{$this->database}'";
         $result = $this->db->query($sql);
         $result = $this->keyToLower($result);
         $primary = [];
         foreach ($result as $item) {
-            $primary[] = $item['table_name'] . '.' . $item['column_name'];
+            $primary[] = $item['table_schema'] . '.' . $item['table_name'] . '.' . $item['column_name'];
         }
         return $primary;
     }
@@ -261,7 +261,7 @@ class MysqlTool
 
             $class[] = "    public \$columns = [";
             foreach ($table['column'] as $column) {
-                $pk = $table['table_name'] . '.' . $column['column_name'];
+                $pk = $table['table_schema'] . '.' . $table['table_name'] . '.' . $column['column_name'];
                 if (in_array($pk, $pks) && $column['extra'] == 'auto_increment') {
                     $pkStr = "    public \$pk = '{$column['column_name']}';";;
                     continue;
