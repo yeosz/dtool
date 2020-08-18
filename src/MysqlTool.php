@@ -261,7 +261,7 @@ class MysqlTool
 
             $class[] = "    public \$columns = [";
             foreach ($table['column'] as $column) {
-                $pk = $table['table_schema'] . '.' . $table['table_name'] . '.' . $column['column_name'];
+                $pk = $column['table_schema'] . '.' . $table['table_name'] . '.' . $column['column_name'];
                 if (in_array($pk, $pks) && $column['extra'] == 'auto_increment') {
                     $pkStr = "    public \$pk = '{$column['column_name']}';";;
                     continue;
